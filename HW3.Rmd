@@ -129,7 +129,7 @@ Using sample “A”, calculate the difference between the mean CE costs for men
 
 
 From problem 5, we can assume same variances for man and woman in sample A.
-Then use the t-distribution to construct the confidence interval since we don't know the population variance.
+Then use the t-distribution to construct the confidence interval since we don't know the population variance. We can try to get the 95% CI step by step here. (We can also conduct a t test directly in R as in problem 7.)
 ```{r}
 sd_men_A = 
   A %>%
@@ -149,7 +149,8 @@ mean_men_A =
   summarise(mean = mean(totchg)) %>%
   pull(mean)
 
-mean_women_A <- A %>% 
+mean_women_A =
+  A %>% 
   filter(sex == "woman") %>%
   summarise(mean = mean(totchg)) %>% 
   pull(mean)
@@ -227,13 +228,14 @@ mean_women
 true_diff
 ```
 
-The actual mean CE cost for the whole population is `r round(true_mean, digits = 2)`, for men and women in the population is `r round(mean_men, digits = 2)` and `r round(mean_women, digits = 2)`. And the 95% CI for sample A and B both included the true actual mean CE costs for men and women.
+The actual mean CE cost for the whole population is `r round(true_mean, digits = 2)`, for men and women in the population is `r round(mean_men, digits = 2)` and `r round(mean_women, digits = 2)`. Look at the plot we've made for the 95% CI  of sample A and B in problem 4, they both included the true actual mean CE costs for men and women in the whole population.
 The true difference for the mean is `r round(true_diff, digits = 2)`.
 
 
 ## Problem 10 (4 points)
 If each student in a class of 140 calculates a 95% confidence interval for ($\mu_{M}-\mu_{W}$), how many of these intervals do you expect to contain the true population mean difference? Calculate the probability that all 140 will contain the true population mean difference. 
 
-
+We can let X be the random variable of the number of students whose 95% CI included the true population mean difference, then X follows a binomial distribution, X ~ Bin(140, 0.95). Then we expect `r 140 * 0.95` students' 95% CI to contain the true mean difference.
+The probability that all 140 will contain the true population difference is `r 0.95^140`.
 
 
