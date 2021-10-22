@@ -197,6 +197,39 @@ We also inferred from sample A and B that larger sample size will lead to a narr
 ## Problem 9 (4 points)
 Now for the truth, which we have the luxury of knowing in this problem set. Compute the actual mean CE cost for men ($\mu_{M}$) and for women ($\mu_{W}$) for the whole population (CE8130entire.csv). Also calculate the difference ($\mu_{M}-\mu_{W}$). Do your 95% CIs include the true means?
 
+```{r}
+# Calculate the actual mean for the whole population
+true_mean = 
+  population %>% 
+  group_by(sex) %>% 
+  summarise(mean_CEcost = mean(totchg)) %>% 
+  pull(mean_CEcost)
+
+# Calculate the actual mean CE costs for men and women
+mean_men = 
+  population %>% 
+  filter(sex == "man") %>% 
+  summarise(mean_CEcost = mean(totchg)) %>%
+  pull(mean_CEcost)
+  
+mean_women = 
+  population %>% 
+  filter(sex == "woman") %>% 
+  summarise(mean_CEcost = mean(totchg)) %>% 
+  pull(mean_CEcost)
+
+# Obtain the true difference
+true_diff = mean_men - mean_women
+
+true_mean
+mean_men
+mean_women
+true_diff
+```
+
+The actual mean CE cost for the whole population is `r round(true_mean, digits = 2)`, for men and women in the population is `r round(mean_men, digits = 2)` and `r round(mean_women, digits = 2)`. And the 95% CI for sample A and B both included the true actual mean CE costs for men and women.
+The true difference for the mean is `r round(true_diff, digits = 2)`.
+
 
 ## Problem 10 (4 points)
 If each student in a class of 140 calculates a 95% confidence interval for ($\mu_{M}-\mu_{W}$), how many of these intervals do you expect to contain the true population mean difference? Calculate the probability that all 140 will contain the true population mean difference. 
