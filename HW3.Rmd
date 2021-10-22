@@ -1,6 +1,6 @@
 ---
-title: "P8130 Fall 2021: Biostatistical Methods I"
-author: "Homework III"
+title: "P8130 Fall 2021: Biostatistical Methods I Homework III"
+author: "Hao Zheng hz2770"
 date: "Due Friday, 10/22 @5:00pm"
 output: 
   pdf_document:
@@ -8,7 +8,8 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(Rmisc)
 ```
 
 # Costs of Carotid Endarterectomy in Maryland
@@ -24,67 +25,96 @@ Draw a random sample without replacement of 200 observations (100 men and 100 wo
 
 
 ```{r}
-population = read.csv("./ce8130entire.csv")
-library(dplyr)
+population = read.csv("./ce8130entire.csv", encoding = "UTF-8") %>% 
+  mutate(
+    sex = case_when(sex == 1 ~ "man", sex == 2 ~ "woman")
+  )
 
-set.seed(2000) #replace 1234 with an integer
+set.seed(2000)
 A = population %>%
   group_by(sex) %>%
   sample_n(100)
+
+A
 ```
+Just draw a random Sample A.
 
 
 ## Problem 2 (3 points)
 Now use the same seed as before but this time draw a random sample without replacement of 60 observations (30 men and 30 women) and call it sample “B” (Note that Sample “B” is more than 3 times smaller than sample “A”). Save it as a separate sample. Replace the seed number with the same seed number as you used above (3 points).
 
 ```{r}
-set.seed(1234) #replace seed number with the same integer you used above
+set.seed(2000)
 B = population %>%
   group_by(sex) %>%
   sample_n(30)
+
+B
 ```
+Then draw Sample B.
+
 
 ## Problem 3 (3 points)
 Using sample “A”, display the distribution of CE cost in $USD (variable name: “totchg”) separately for men and women using side-by-side boxplots and histograms. Label your figures appropriately.
 
 ```{r}
-#Suggested generic code is provided as a starting point. 
-#Feel free to modify or use any other function/s as deemed necessary.
-boxplot(A$totchg ~ A$sex, names=c("Men","Women"), ylab ="EC cost in $USD", xlab ="Sex")
+# boxplot
+A %>% 
+  ggplot(aes(x = sex, y = totchg, group = sex, fill = sex))+
+  geom_boxplot()+
+  labs(x = "Sex", y = "CE cost in $USD", title = "cost by sex")
 
-library(ggplot2)
-ggplot(A, aes(x = totchg)) +
-  geom_histogram(aes(color = sex, fill = sex), 
-                position = "identity", bins = 30, alpha = 0.4)
+
+# histogram
+A %>% 
+  mutate(sex = recode(sex, `1` = "man", `2` = "woman")) %>% 
+  ggplot(aes(x = totchg, fill = sex)) +
+  geom_histogram(position = "identity", bins = 30, alpha = 0.4) 
 ```
+
 
 ## Problem 4 (6 points)
 Calculate the mean CE cost and 95% confidence interval separately for men and women in sample “A” as well as sample “B”. Assume we don’t know the population variance. Plot the sample “A” and sample “B” confidence intervals next to each other (by sex). How do they differ, which confidence intervals are wider?  Explain why.
 ##Note: For the purposes of confidence interval estiamteion and hypothesis testing, let's assume that all the assumptions, including the assumption of normal distribution, are met.
 
 ```{r}
-#Suggested generic code is provided as a starting point. 
-#Feel free to modify or use any other function/s as deemed necessary.
-A$sample = "Sample A"
-B$sample = "Sample B"
+A = 
+  A %>% 
+  mutate(sample = "Sample A")
+
+B = 
+  B %>% 
+  mutate(sample = "Sample B")
+
 A_B = rbind(A, B)
-library(Rmisc)
-A_B_summary <- summarySE(A_B, measurevar="totchg", groupvars=c("sex","sample"))
-A_B_summary$sex <- as.factor(A_B_summary$sex)
+
+A_B_summary = summarySE(
+  A_B, measurevar="totchg", groupvars=c("sex","sample")
+  ) %>% 
+  mutate(sex = as.factor(sex))
+
 p_dodge = position_dodge(0.1) # move them .05 to the left and right
-plot = ggplot(A_B_summary, aes(x=sample, y=totchg, colour=sex)) + 
-    geom_errorbar(aes(ymin=totchg-ci, ymax=totchg+ci), width=.1, position=p_dodge) +
-    geom_point(position=p_dodge)
+
+plot = 
+  A_B_summary %>% 
+  ggplot(aes(x=sample, y=totchg, colour=sex)) +
+  geom_errorbar(
+    aes(ymin=totchg-ci, ymax=totchg+ci), width=.1, position=p_dodge
+    ) +
+  geom_point(position=p_dodge) +
+  labs(x = "sample", y = "Total Cost", title = "Sample A and B's Confidence Interval by sex")
+
+plot
 ```
+The confidence interval for Sample B is much wider compared to sample A. Because Sample A has larger sample size n than Sample B, and when we calculate the confidence interval, in the standard error term, n is in the denominator. Therefore, bigger value of n will lead to a smaller confidence interval.
 
 
 ## Problem 5 (4 points)
 Conduct test of equality of variance of CE cost among men vs women in sample A and interpret your results.
 ```{r}
-#Suggested generic code is provided as a starting point. 
-#Feel free to modify or use any other function/s as deemed necessary.
 var.test(totchg ~ sex, data = A)
 ```
+
 
 
 ## Problem 6 (5 points)
