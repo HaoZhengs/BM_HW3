@@ -116,13 +116,17 @@ The confidence interval for Sample B is much wider compared to sample A. Because
 Conduct test of equality of variance of CE cost among men vs women in sample A and interpret your results.
 ```{r}
 var.test(totchg ~ sex, data = A)
+
+Fcrit = qf(.975, df1 = 99, df2 = 99)
+Fcrit
 ```
 
-We conducted a F-Test to test whether the two variances are equal. We fail to reject the null hypothesis that the variances are the same since p-value is 0.3418, quite large and the 95% confidence interval involves the value 1.
+We conducted a F-Test to test whether the two variances are equal. We fail to reject the null hypothesis that the variances are the same since `F = 1.2113 < Fcrit = 1.486234`. In addition, the 95% confidence interval involves the value 1.
 
 
 ## Problem 6 (5 points)
 Using sample “A”, calculate the difference between the mean CE costs for men and women (cost in men - cost in women).  Calculate a 95% CI for this difference. Assume we don’t know the population variance. Your decision of equal vs unequal variance should be based on your answer in Problem 5.
+
 
 From problem 5, we can assume same variances for man and woman in sample A.
 Then use the t-distribution to construct the confidence interval since we don't know the population variance.
@@ -163,6 +167,7 @@ upper = mean_men_A - mean_women_A + tcrit * std_pooled * sqrt(1/100 + 1/100)
 CI = c(lower, upper)
 CI
 ```
+
 Therefore, the 95% CI for the difference between the mean CE costs for men and women is [-410.2963, 1985.9163].
 
 
@@ -170,16 +175,24 @@ Therefore, the 95% CI for the difference between the mean CE costs for men and w
 Now use sample “A” to test the hypothesis whether men and women have a different CE cost. State the null and alternative hypotheses and interpret your results.
 
 ```{r}
-#Suggested generic code is provided as a starting point. 
-#Feel free to modify or use any other function/s as deemed necessary.
-#res <- t.test(totchg ~ sex, data = A, var.equal = TRUE OR FALSE)
+# Conduct a hypothesis test for the difference in problem 6.
+res = t.test(totchg ~ sex, data = A, var.equal = TRUE, paired = FALSE)
+res
 ```
+
+The null hypothesis: `H0: mean_men_A = mean_women_A`; Alternative hypothesis: `H1: mean_men_A != mean_women_A`. We get p-value = 0.1962 > 0.05, so we cannot reject the null hypothesis.
+So we cannot say the mean CE costs for men and women in sample A is different.
 
 
 ## Problem 8 (11 points)
 Use your results from Sample A: graphs, estimates, confidence intervals, and/or test results, to write a one paragraph summary of your findings regarding the average costs of CE for men and women. Write as if for an audience of health services researchers. Be quantitative and use health-services language, rather than statistical jargon in your write-up.
 
 
+First, in order to decide whether there is a difference between different sex on average CE costs, we need to specify whether we can assume equal variance. So we conduct a F-test and find out that there in no evidence indicating unequal variances. We can assume equal variances for different sex regarding to average CE costs.
+
+Next, since we don't know the population variances, we use a t-test. The results shows: We cannot say the average CE costs for men and women are different, and we are 95% confident that the true difference between the average CE cost for men and women is between `-410.2963` and `1985.9163`. We also find the difference between the mean of the two group is `r 7039.32 - 6251.51`.
+
+We also inferred from sample A and B that larger sample size will lead to a narrower confidence interval. Therefore, for further study, if we want to obtain a narrower 95% CI, we can try to increase the sample size. 
 
 ## Problem 9 (4 points)
 Now for the truth, which we have the luxury of knowing in this problem set. Compute the actual mean CE cost for men ($\mu_{M}$) and for women ($\mu_{W}$) for the whole population (CE8130entire.csv). Also calculate the difference ($\mu_{M}-\mu_{W}$). Do your 95% CIs include the true means?
