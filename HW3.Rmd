@@ -37,6 +37,7 @@ A = population %>%
 
 A
 ```
+
 Just draw a random Sample A.
 
 
@@ -51,6 +52,7 @@ B = population %>%
 
 B
 ```
+
 Then draw Sample B.
 
 
@@ -106,6 +108,7 @@ plot =
 
 plot
 ```
+
 The confidence interval for Sample B is much wider compared to sample A. Because Sample A has larger sample size n than Sample B, and when we calculate the confidence interval, in the standard error term, n is in the denominator. Therefore, bigger value of n will lead to a smaller confidence interval.
 
 
@@ -115,10 +118,52 @@ Conduct test of equality of variance of CE cost among men vs women in sample A a
 var.test(totchg ~ sex, data = A)
 ```
 
+We conducted a F-Test to test whether the two variances are equal. We fail to reject the null hypothesis that the variances are the same since p-value is 0.3418, quite large and the 95% confidence interval involves the value 1.
 
 
 ## Problem 6 (5 points)
-Using sample “A”, calculate the difference between the mean CE costs for men and women (cost in men -cost in women).  Calculate a 95% CI for this difference. Assume we don’t know the population variance. Your decision of equal vs unequal variance should be based on your answer in Problem 5.
+Using sample “A”, calculate the difference between the mean CE costs for men and women (cost in men - cost in women).  Calculate a 95% CI for this difference. Assume we don’t know the population variance. Your decision of equal vs unequal variance should be based on your answer in Problem 5.
+
+From problem 5, we can assume same variances for man and woman in sample A.
+Then use the t-distribution to construct the confidence interval since we don't know the population variance.
+```{r}
+sd_men_A = 
+  A %>%
+  filter(sex == "man") %>%
+  summarise(sd = sd(totchg)) %>% 
+  pull(sd)
+
+sd_women_A =
+  A %>%
+  filter(sex == "woman") %>% 
+  summarise(sd = sd(totchg)) %>% 
+  pull(sd)
+
+mean_men_A =
+  A %>% 
+  filter(sex == "man") %>%
+  summarise(mean = mean(totchg)) %>%
+  pull(mean)
+
+mean_women_A <- A %>% 
+  filter(sex == "woman") %>%
+  summarise(mean = mean(totchg)) %>% 
+  pull(mean)
+
+# Calculate the pooled standard deviation
+std_pooled = sqrt(((100 - 1) * sd_men_A^2 + (100 - 1) * sd_women_A^2) / (100 + 100 - 2))
+
+# calculate critical value
+tcrit = qt(0.975, df = 100 + 100 - 2)
+
+# Calculate the 95% CI
+lower = mean_men_A - mean_women_A - tcrit * std_pooled * sqrt(1/100 + 1/100)
+upper = mean_men_A - mean_women_A + tcrit * std_pooled * sqrt(1/100 + 1/100)
+
+CI = c(lower, upper)
+CI
+```
+Therefore, the 95% CI for the difference between the mean CE costs for men and women is [-410.2963, 1985.9163].
 
 
 ## Problem 7 (7 points)
